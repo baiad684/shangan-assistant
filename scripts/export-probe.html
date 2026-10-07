@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>战报导出探针</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #e8ecea; padding: 24px;
+    font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  }
+  h1 { font-size: 15px; color: #1a2b26; margin-bottom: 6px; }
+  .note { font-size: 12px; color: #5b6b65; margin-bottom: 16px; line-height: 1.7; }
+  .note b { color: #047857; }
+  .row { display: flex; gap: 26px; align-items: flex-start; }
+  .panel { }
+  .cap { font-size: 12px; font-weight: 600; color: #47554f; margin-bottom: 8px; }
+  /* 左边：屏幕上的卡片（375 逻辑像素）；右边：导出的 750×1000 按 375 显示 —— 两者应逐像素一致 */
+  .screen-card { width: 375px; height: 500px; border-radius: 20px; overflow: hidden; }
+  .screen-card > div { box-shadow: 0 10px 30px rgba(4, 92, 66, .16); border-radius: 20px; }
+  #exported { width: 375px; border-radius: 20px; box-shadow: 0 10px 30px rgba(4, 92, 66, .16); display: block; }
+  #status {
+    font-size: 12.5px; color: #047857; font-weight: 600;
+    background: #fff; border-radius: 10px; padding: 9px 13px; margin-bottom: 16px;
+    display: inline-block;
+  }
+  #status.bad { color: #b91c1c; }
+</style>
+</head>
+<body>
+  <h1>战报导出探针</h1>
+  <p class="note">
+    左：屏幕上的卡片（375×500 逻辑像素）&nbsp;·&nbsp;右：导出的 PNG（应输出 <b>750×1000</b>，此处按 375 宽显示）<br>
+    两边应完全一致。若右侧丢了绿色渐变或光晕，说明导出有问题。
+  </p>
+  <div id="status">导出中…</div>
+  <div class="row">
+    <div class="panel">
+      <div class="cap">屏幕上的卡片</div>
+      <div class="screen-card" id="live"></div>
+    </div>
+    <div class="panel">
+      <div class="cap">导出的 PNG</div>
+      <img id="exported" alt="导出的战报">
+    </div>
+  </div>
+  <script src="probe.js"></script>
+  <script>
+    Probe.live(document.getElementById('live'));
+    Probe.run()
+      .then(function (r) {
+        document.getElementById('exported').src = r.dataUrl;
+        var el = document.getElementById('status');
+        var ok = r.width === 750 && r.height === 1000;
+        el.className = ok ? '' : 'bad';
+        el.textContent = (ok ? '导出尺寸正确：' : '导出尺寸异常：') + r.width + '×' + r.height;
+      })
+      .catch(function (e) {
+        var el = document.getElementById('status');
+        el.className = 'bad';
+        el.textContent = '导出失败：' + e.message;
+      });
+  </script>
+</body>
+</html>

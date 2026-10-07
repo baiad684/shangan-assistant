@@ -1,0 +1,48 @@
+{
+  "name": "shangan-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "description": "上岸助手 — 考研学习督促工具",
+  "scripts": {
+    "dev": "next dev",
+    "dev:host": "next dev -H 0.0.0.0",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "start:host": "next start -H 0.0.0.0",
+    "lint": "next lint",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "reset-password": "tsx scripts/reset-password.ts",
+    "reset-data": "tsx scripts/reset-data.ts",
+    "seed-demo": "tsx scripts/seed-demo.ts",
+    "selftest": "tsx scripts/selftest.ts",
+    "verify:auth": "tsx scripts/verify-auth.ts",
+    "preview:report": "tsx --tsconfig scripts/tsconfig.json scripts/preview-report.tsx",
+    "preview:chart": "tsx --tsconfig scripts/tsconfig.json scripts/preview-chart.tsx",
+    "preview:export": "esbuild scripts/export-probe.tsx --bundle --format=iife --global-name=Probe --outfile=scripts/probe.js --tsconfig=scripts/tsconfig.json",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.16.2",
+    "bcryptjs": "^3.0.2",
+    "html-to-image": "^1.11.13",
+    "jose": "^6.1.0",
+    "next": "^15.5.4",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "zod": "^4.6.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.13",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.18.6",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "postcss": "^8.5.6",
+    "prisma": "^6.16.2",
+    "tailwindcss": "^4.1.13",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.2"
+  }
+}

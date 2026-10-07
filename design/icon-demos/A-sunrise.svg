@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="方案A 日出上岸">
+  <defs>
+    <linearGradient id="a-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2FC08C"/>
+      <stop offset="1" stop-color="#087B55"/>
+    </linearGradient>
+    <linearGradient id="a-sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0B8259"/>
+      <stop offset="1" stop-color="#054D36"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#a-sky)"/>
+
+  <!-- 日晕 -->
+  <circle cx="256" cy="232" r="146" fill="#FFFBEB" opacity="0.16"/>
+
+  <!-- 太阳 -->
+  <circle cx="256" cy="232" r="112" fill="#FFFBEB"/>
+
+  <!-- 海面 -->
+  <path d="M0 340 Q128 318 256 340 T512 340 L512 512 L0 512 Z" fill="url(#a-sea)"/>
+
+  <!-- 波浪 -->
+  <path d="M96 396 Q128 378 160 396 T224 396 T288 396 T352 396 T416 396"
+        fill="none" stroke="#ECFDF5" stroke-width="16" stroke-linecap="round" opacity="0.95"/>
+  <path d="M128 448 Q154 434 180 448 T232 448 T284 448 T336 448 T384 448"
+        fill="none" stroke="#ECFDF5" stroke-width="13" stroke-linecap="round" opacity="0.5"/>
+</svg>

@@ -1,0 +1,21 @@
+node_modules
+.next
+out
+backups
+*.db
+*.db-journal
+prisma/*.db*
+.env
+.env*.local
+.DS_Store
+next-env.d.ts
+
+# 开发工具的构建产物
+scripts/probe.js
+
+# 本地工具目录
+.workbuddy/
+.zcode/
+
+*.tsbuildinfo
+*.log

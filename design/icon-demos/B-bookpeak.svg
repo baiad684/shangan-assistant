@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="方案B 书山旗帜">
+  <defs>
+    <linearGradient id="b-pageL" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#12B981"/>
+      <stop offset="1" stop-color="#0A8A5F"/>
+    </linearGradient>
+    <linearGradient id="b-pageR" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0FA876"/>
+      <stop offset="1" stop-color="#067A50"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="#F6F1E6"/>
+  <circle cx="256" cy="262" r="196" fill="#EAE2CE"/>
+
+  <!-- 书本厚度 -->
+  <g fill="#065F46">
+    <path d="M256 332 C 205 286 140 268 88 280 L88 356 C 140 344 205 362 256 408 Z"/>
+    <path d="M256 332 C 307 286 372 268 424 280 L424 356 C 372 344 307 362 256 408 Z"/>
+  </g>
+
+  <!-- 翻开的书页，轮廓如两座山 -->
+  <path d="M256 316 C 205 270 140 252 88 264 L88 340 C 140 328 205 346 256 392 Z" fill="url(#b-pageL)"/>
+  <path d="M256 316 C 307 270 372 252 424 264 L424 340 C 372 328 307 346 256 392 Z" fill="url(#b-pageR)"/>
+
+  <!-- 中缝 -->
+  <path d="M256 318 L256 390" stroke="#06422F" stroke-width="8" stroke-linecap="round" opacity="0.35"/>
+
+  <!-- 旗杆与旗 -->
+  <path d="M256 318 L256 148" stroke="#065F46" stroke-width="12" stroke-linecap="round"/>
+  <path d="M266 148 L356 176 L266 204 Z" fill="#F97316"/>
+</svg>

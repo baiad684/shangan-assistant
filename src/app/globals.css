@@ -1,0 +1,190 @@
+@import 'tailwindcss';
+
+/* 暗色模式跟随 .dark（由 ThemeScript 根据系统偏好/本地设置挂到 <html> 上） */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * 语义化令牌：@theme inline 让工具类直接引用 var()，
+ * 因此 .dark 覆盖 :root 时，所有 bg-canvas / text-ink 会自动跟着切换，
+ * 不需要在每个组件上写 dark: 变体。
+ */
+@theme inline {
+  --color-canvas: var(--c-canvas);
+  --color-card: var(--c-card);
+  --color-line: var(--c-line);
+  --color-ink: var(--c-ink);
+  --color-ink2: var(--c-ink2);
+  --color-ink3: var(--c-ink3);
+  --color-soft: var(--c-soft);
+
+  --color-brand: var(--c-brand);
+  --color-brand-strong: var(--c-brand-strong);
+  --color-brand-soft: var(--c-brand-soft);
+  --color-brand-line: var(--c-brand-line);
+
+  --color-danger: #e05a5a;
+  --color-warn: #d97706;
+  --color-gold: #fbbf24;
+
+  --radius-card: 16px;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB',
+    sans-serif;
+}
+
+:root {
+  --c-canvas: #eef2f0;
+  --c-card: #ffffff;
+  --c-line: #e6eae8;
+  --c-ink: #1a2b26;
+  --c-ink2: #5b6b65;
+  --c-ink3: #93a29c;
+  --c-soft: #f7faf8;
+
+  --c-brand: #059669;
+  --c-brand-strong: #047857;
+  --c-brand-soft: #ecfdf5;
+  --c-brand-line: #a7f3d0;
+}
+
+.dark {
+  --c-canvas: #0a120f;
+  --c-card: #121c19;
+  --c-line: #22302b;
+  --c-ink: #e8f1ed;
+  --c-ink2: #a3b3ac;
+  --c-ink3: #6f817a;
+  --c-soft: #17231f;
+
+  --c-brand: #10b981;
+  --c-brand-strong: #34d399;
+  --c-brand-soft: #0f2a22;
+  --c-brand-line: #1c4a3c;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--c-canvas);
+  color: var(--c-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* 数字等宽，避免倒计时/时长跳动 */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+/* 关键节点动画（成就弹窗、战报生成、打卡勾选）—— 日常操作不加动效 */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes badge-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+  }
+  50% {
+    box-shadow: 0 0 22px 4px rgba(251, 191, 36, 0.45);
+  }
+}
+
+.anim-fade-up {
+  animation: fade-up 0.18s ease;
+}
+.anim-pop {
+  animation: pop-in 0.25s ease;
+}
+.anim-sheet {
+  animation: sheet-up 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.anim-badge {
+  animation: badge-glow 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* 安全区：底部导航在 iPhone 上不被小白条压住 */
+.pb-safe {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 68px);
+}
+.nav-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/*
+ * 热力图分档配色（对齐三层时长线：空 / 有记录 / ≥1h / ≥2h / ≥8h）
+ * 用类而非内联色值，这样暗色模式由 CSS 统一接管。
+ */
+.hm-0 { background: #e6eae8; }
+.hm-1 { background: #a7f3d0; }
+.hm-2 { background: #6ee7b7; }
+.hm-3 { background: #34d399; }
+.hm-4 { background: #059669; }
+
+.dark .hm-0 { background: #1e2b27; }
+.dark .hm-1 { background: #14532d; }
+.dark .hm-2 { background: #15803d; }
+.dark .hm-3 { background: #16a34a; }
+.dark .hm-4 { background: #22c55e; }

@@ -1,0 +1,70 @@
+// 上岸助手 — 数据模型
+// 口径依据：IMPLEMENTATION.md §3
+// 约定：时间戳一律 UTC 存储；归属日期冗余成 YYYY-MM-DD 字符串（Asia/Shanghai），聚合直接用它，
+//      避免 serverless / 不同环境默认时区导致的错位。
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// 科目。删除 = 软删除（archivedAt 置值），历史专注记录与统计保留。
+model Subject {
+  id             Int             @id @default(autoincrement())
+  name           String
+  color          String
+  archivedAt     DateTime?
+  sortOrder      Int             @default(0)
+  createdAt      DateTime        @default(now())
+  focusSessions  FocusSession[]
+  completedItems CompletedItem[]
+}
+
+/// 今日完成记录。做完一件事随手记一笔，列表按 createdAt 时间顺序呈现。
+model CompletedItem {
+  id        Int      @id @default(autoincrement())
+  title     String
+  localDate String
+  subjectId Int?
+  note      String?
+  createdAt DateTime @default(now())
+  subject   Subject? @relation(fields: [subjectId], references: [id])
+
+  @@index([localDate])
+}
+
+/// 专注记录。番茄钟完成 / 中断 / 手动补记三种来源统一落这张表。
+model FocusSession {
+  id             Int      @id @default(autoincrement())
+  /// 客户端生成的 UUID。离线补交/重试时据此幂等，保证同一次专注不会重复入库。
+  clientId       String?  @unique
+  subjectId      Int
+  startedAt      DateTime
+  localDate      String
+  focusMinutes   Int
+  plannedMinutes Int?
+  pausedSeconds  Int      @default(0)
+  source         String
+  note           String?
+  createdAt      DateTime @default(now())
+  subject        Subject  @relation(fields: [subjectId], references: [id])
+
+  @@index([localDate])
+  @@index([subjectId])
+}
+
+/// 键值设置。value 存 JSON 字符串，新增配置项不需要改 schema（扩展点）。
+model Setting {
+  key   String @id
+  value String
+}
+
+/// 已解锁成就。
+model Achievement {
+  key        String   @id
+  unlockedAt DateTime
+}

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>上岸助手 · 前端 Demo</title>
+<style>
+:root{
+  --p:#059669; --p-d:#047857; --p-l:#ecfdf5; --p-b:#a7f3d0;
+  --bg:#eef2f0; --card:#ffffff; --line:#e6eae8;
+  --t1:#1a2b26; --t2:#5b6b65; --t3:#93a29c;
+  --c-pol:#e05a5a; --c-eng:#3b82f6; --c-math:#8b5cf6; --c-major:#f59e0b;
+  --warn:#d97706;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--t1);font-size:14px;line-height:1.6}
+.app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:80px;position:relative}
+.hd{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between}
+.hd .logo{font-size:17px;font-weight:700;color:var(--t1)}
+.hd .logo i{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--p);margin-right:7px;font-style:normal;vertical-align:1px}
+.hd .count{background:var(--p-l);color:var(--p-d);border:1px solid var(--p-b);border-radius:999px;padding:3px 12px;font-size:12.5px;font-weight:600}
+.hd .count b{font-size:15px}
+.page{display:none;padding-top:12px}
+.page.on{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;margin:12px 16px;padding:16px}
+.card h3{font-size:13px;color:var(--t2);font-weight:600;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.card h3 .more{font-size:12px;color:var(--t3);font-weight:400}
+
+/* 今日目标 */
+.goal-top{display:flex;align-items:baseline;gap:8px}
+.goal-top .num{font-size:32px;font-weight:700;letter-spacing:-1px}
+.goal-top .num small{font-size:14px;font-weight:600;color:var(--t2)}
+.goal-top .sub{font-size:12.5px;color:var(--t3)}
+.bar{height:12px;background:#edf1ef;border-radius:99px;margin-top:12px;position:relative;overflow:visible}
+.bar .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#34d399,var(--p));width:0;transition:width .5s ease;position:relative}
+.tick{position:absolute;top:-3px;width:2px;height:18px;background:var(--t3);opacity:.55;border-radius:2px}
+.tick:after{content:attr(data-l);position:absolute;top:20px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--t3);white-space:nowrap}
+.goal-stats{display:flex;gap:10px;margin-top:26px}
+.gs{flex:1;background:#f7faf8;border-radius:12px;padding:10px 12px}
+.gs .v{font-size:17px;font-weight:700}
+.gs .v.ok{color:var(--p)}
+.gs .k{font-size:11.5px;color:var(--t3)}
+
+/* 番茄钟 */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{padding:5px 14px;border-radius:99px;border:1.5px solid var(--line);font-size:13px;color:var(--t2);cursor:pointer;background:#fff;transition:.15s}
+.chip.sel{border-color:var(--p);color:var(--p-d);background:var(--p-l);font-weight:600}
+.pomo{display:flex;flex-direction:column;align-items:center}
+.ringwrap{position:relative;width:210px;height:210px}
+.ringwrap svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:#edf1ef;stroke-width:11}
+.ring-fg{fill:none;stroke:var(--p);stroke-width:11;stroke-linecap:round;transition:stroke-dashoffset .3s linear}
+.ring-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-txt .t{font-size:38px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:1px}
+.ring-txt .s{font-size:12px;color:var(--t3);margin-top:2px}
+.pomo-btns{display:flex;gap:12px;margin-top:16px}
+.btn{border:none;border-radius:12px;padding:11px 34px;font-size:15px;font-weight:600;cursor:pointer;transition:.15s}
+.btn.main{background:var(--p);color:#fff}
+.btn.main:active{background:var(--p-d)}
+.btn.ghost{background:#f1f5f3;color:var(--t2)}
+.btn.ghost:active{background:#e5eae8}
+.dots{display:flex;align-items:center;gap:6px;margin-top:14px;font-size:12px;color:var(--t3)}
+.dot{width:10px;height:10px;border-radius:99px;background:#e2e7e4}
+.dot.on{background:var(--p)}
+.pomo-tip{font-size:11.5px;color:var(--t3);margin-top:8px;text-align:center}
+
+/* 任务 */
+.task{display:flex;align-items:flex-start;gap:10px;padding:11px 4px;border-bottom:1px solid #f0f3f1}
+.task:last-child{border-bottom:none}
+.cb{width:21px;height:21px;border-radius:7px;border:2px solid #cfd8d3;flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.cb.on{background:var(--p);border-color:var(--p)}
+.cb.on:after{content:"";width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.task .tt{flex:1;cursor:pointer}
+.task .tt .ti{font-size:14.5px}
+.task.done .ti{text-decoration:line-through;color:var(--t3)}
+.task .tt .tm{font-size:12px;color:var(--t3);margin-top:1px}
+.tag{display:inline-block;font-size:10.5px;padding:1px 8px;border-radius:6px;margin-right:6px;font-weight:600}
+.tag.daily{background:#fef3c7;color:#92400e}
+.tag.sub-pol{background:#fdeaea;color:#b91c1c}
+.tag.sub-eng{background:#e7f0fe;color:#1d4ed8}
+.tag.sub-math{background:#f1eafe;color:#6d28d9}
+.tag.sub-major{background:#fef4e2;color:#b45309}
+.mv{font-size:11.5px;color:var(--p);border:1px solid var(--p-b);background:var(--p-l);border-radius:8px;padding:3px 8px;cursor:pointer;flex-shrink:0;margin-top:1px}
+.mv.del{color:var(--t3);border-color:var(--line);background:#fff;padding:3px 7px}
+.addrow{display:flex;gap:8px;margin-top:12px}
+.addrow input{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;outline:none}
+.addrow input:focus{border-color:var(--p)}
+.addrow button{border:none;background:var(--p);color:#fff;border-radius:10px;padding:0 18px;font-weight:600;cursor:pointer}
+.task-foot{font-size:11.5px;color:var(--t3);margin-top:10px}
+
+/* 统计 */
+.wk{display:flex;align-items:flex-end;gap:8px;height:150px;padding:0 2px}
+.wcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end}
+.wbars{width:70%;display:flex;flex-direction:column-reverse;border-radius:6px 6px 0 0;overflow:hidden}
+.wbars div{width:100%}
+.wlab{font-size:11px;color:var(--t3)}
+.wval{font-size:10.5px;color:var(--t2)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:var(--t2)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.hm{display:flex;gap:3px;overflow-x:auto;padding-bottom:4px}
+.hcol{display:flex;flex-direction:column;gap:3px}
+.hc{width:12px;height:12px;border-radius:3px;background:#edf1ef}
+.hc.l1{background:#a7f3d0}.hc.l2{background:#6ee7b7}.hc.l3{background:#34d399}.hc.l4{background:#059669}
+.hm-leg{display:flex;gap:4px;align-items:center;font-size:11px;color:var(--t3);margin-top:8px;justify-content:flex-end}
+.sharerow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f3f1}
+.sharerow:last-child{border-bottom:none}
+.sharerow .nm{width:56px;font-size:13px}
+.sharerow .sb{flex:1;height:10px;background:#f0f3f1;border-radius:99px;overflow:hidden}
+.sharerow .sb div{height:100%;border-radius:99px}
+.sharerow .pv{width:44px;text-align:right;font-size:12.5px;color:var(--t2);font-variant-numeric:tabular-nums}
+.total-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:11px 14px;background:#f7faf8;border:1px dashed var(--p-b);border-radius:12px;font-size:13px;color:var(--t2)}
+.total-row b{font-size:16px;color:var(--p-d);font-variant-numeric:tabular-nums}
+
+/* 成就 */
+.lv-card{background:linear-gradient(135deg,#022c22,#047857);border:none;color:#fff}
+.lv-card h3{color:#d1fae5}
+.lv-row{display:flex;align-items:center;gap:14px}
+.lv-badge{width:56px;height:56px;border-radius:16px;background:rgba(251,191,36,.14);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0;border:1px solid rgba(251,191,36,.45);color:#fbbf24}
+.lv-info{flex:1}
+.lv-info .l{font-size:18px;font-weight:700}
+.xpbar{height:9px;background:rgba(255,255,255,.18);border-radius:99px;margin-top:8px;overflow:hidden}
+.xpbar div{height:100%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:99px}
+.lv-info .x{font-size:11.5px;color:#a7f3d0;margin-top:6px}
+.bgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.bd{text-align:center;padding:10px 4px;border-radius:14px;background:#f7faf8}
+.bd .ic{width:44px;height:44px;border-radius:99px;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff}
+.bd .nm{font-size:11px;font-weight:600}
+.bd .cd{font-size:9.5px;color:var(--t3);margin-top:2px;line-height:1.35}
+.bd.off{opacity:.55;filter:grayscale(.9)}
+.bd.off .ic{background:#d7ddd9 !important;color:#9aa59f}
+
+/* 设置 */
+.srow{display:flex;align-items:center;justify-content:space-between;padding:13px 2px;border-bottom:1px solid #f0f3f1;cursor:pointer}
+.srow:last-child{border-bottom:none}
+.srow .sl{font-size:14px}
+.srow .sr{font-size:13px;color:var(--t3);display:flex;align-items:center;gap:4px}
+.srow .sr:after{content:"›";font-size:16px;color:#c3ccc7}
+.dotc{display:inline-block;width:10px;height:10px;border-radius:99px;margin-right:2px}
+
+/* 底部导航 */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;z-index:30;padding-bottom:env(safe-area-inset-bottom)}
+.nv{flex:1;text-align:center;padding:9px 0 8px;cursor:pointer;color:var(--t3)}
+.nv .ni{font-size:19px;line-height:1.15}
+.nv .nl{font-size:10.5px}
+.nv.on{color:var(--p);font-weight:600}
+.badge-red{position:absolute;top:4px;right:26%;width:8px;height:8px;background:#e05a5a;border-radius:99px}
+
+/* toast & modal */
+#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:#134e4a;color:#fff;padding:10px 20px;border-radius:12px;font-size:13.5px;opacity:0;transition:.25s;z-index:99;pointer-events:none;white-space:nowrap;max-width:88vw}
+#toast.show{opacity:1;transform:translateX(-50%)}
+.mask{position:fixed;inset:0;background:rgba(15,23,20,.55);z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
+.mask.on{display:flex}
+.report{width:300px;background:#fff;border-radius:20px;padding:26px 22px;text-align:center;animation:pop .25s ease}
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.report .rk{font-size:11px;color:var(--t3);letter-spacing:2px}
+.report .rd{font-size:13px;color:var(--p-d);font-weight:700;margin-top:2px}
+.pie{width:140px;height:140px;border-radius:99px;margin:18px auto;position:relative;background:conic-gradient(var(--c-pol) 0 34%,var(--c-eng) 34% 60%,var(--c-math) 60% 82%,var(--c-major) 82% 100%)}
+.pie:after{content:"";position:absolute;inset:26px;background:#fff;border-radius:99px}
+.pie .pv2{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2}
+.pie .pv2 b{font-size:24px}
+.pie .pv2 span{font-size:11px;color:var(--t3)}
+.rline{display:flex;justify-content:space-between;font-size:13px;color:var(--t2);padding:7px 6px;border-bottom:1px dashed #eef1ef}
+.rbtns{display:flex;gap:10px;margin-top:18px}
+.rbtns .btn{flex:1;padding:10px 0;font-size:14px}
+.demo-tag{position:fixed;right:12px;top:66px;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;font-size:11px;padding:4px 10px;border-radius:99px;z-index:40}
+kbd{background:#f1f5f3;border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:11px;font-family:inherit}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hd">
+    <div class="logo"><i></i>上岸助手</div>
+    <div class="count">距考研 <b id="dday">--</b> 天</div>
+  </div>
+  <div class="demo-tag">Demo · 模拟数据</div>
+
+  <!-- 今日 -->
+  <div class="page on" id="pg0">
+    <div class="card">
+      <h3>今日目标 <span class="more">目标线 8h · 可改</span></h3>
+      <div class="goal-top">
+        <div class="num" id="todayMin">2<small>h</small> 34<small>m</small></div>
+        <div class="sub">/ 8h · <b id="todayPct" style="color:var(--p)">32%</b></div>
+      </div>
+      <div class="bar">
+        <div class="fill" id="goalFill"></div>
+        <div class="tick" style="left:12.5%" data-l="打卡线 1h"></div>
+        <div class="tick" style="left:25%" data-l="达标线 2h"></div>
+      </div>
+      <div class="goal-stats">
+        <div class="gs"><div class="v ok">已打卡</div><div class="k">连续 12 天</div></div>
+        <div class="gs"><div class="v ok">已达标</div><div class="k">今日 ≥2h</div></div>
+        <div class="gs"><div class="v" id="taskStat">5</div><div class="k">完成事项</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>番茄钟 <span class="more">45 分钟 · 计时走真实时间，切后台不暂停</span></h3>
+      <div class="chips" id="subChips">
+        <div class="chip sel" data-s="政治">政治</div>
+        <div class="chip" data-s="英语">英语</div>
+        <div class="chip" data-s="数学">数学</div>
+        <div class="chip" data-s="专业课">专业课</div>
+      </div>
+      <div class="pomo">
+        <div class="ringwrap">
+          <svg width="210" height="210">
+            <circle class="ring-bg" cx="105" cy="105" r="90"/>
+            <circle class="ring-fg" id="ring" cx="105" cy="105" r="90" stroke-dasharray="565.5" stroke-dashoffset="565.5"/>
+          </svg>
+          <div class="ring-txt">
+            <div class="t" id="tDisp">45:00</div>
+            <div class="s" id="tState">准备专注 · 政治</div>
+          </div>
+        </div>
+        <div class="pomo-btns">
+          <button class="btn main" id="btnStart">开始专注</button>
+          <button class="btn ghost" id="btnAbort">中断放弃</button>
+        </div>
+        <div class="dots" id="tomatoDots"></div>
+        <div class="pomo-tip">每 3 个番茄长休息 20 分钟（当日清零）· 暂停时长如实记录</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>今日完成 <span class="more">做完就记一笔</span></h3>
+      <div id="taskList"></div>
+      <div class="addrow">
+        <input id="taskInput" placeholder="刚完成了什么？记一笔（快捷键 N）">
+        <button onclick="addRecord()">记一笔</button>
+      </div>
+      <div class="task-foot">按时间顺序记录 · 点 ✕ 删除 · 正式版可选科目</div>
+    </div>
+  </div>
+
+  <!-- 统计 -->
+  <div class="page" id="pg1">
+    <div class="card">
+      <h3>本周学习时长 <span class="more">按科目 · 点击柱子看明细</span></h3>
+      <div class="wk" id="weekChart"></div>
+      <div class="legend">
+        <span><i style="background:var(--c-pol)"></i>政治</span>
+        <span><i style="background:var(--c-eng)"></i>英语</span>
+        <span><i style="background:var(--c-math)"></i>数学</span>
+        <span><i style="background:var(--c-major)"></i>专业课</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>打卡热力图 <span class="more">近 6 个月 · 可切全程</span></h3>
+      <div class="hm" id="heatmap"></div>
+      <div class="hm-leg">少 <span class="hc"></span><span class="hc l1"></span><span class="hc l2"></span><span class="hc l3"></span><span class="hc l4"></span> 多</div>
+    </div>
+    <div class="card">
+      <h3>科目占比 <span class="more">近 30 天</span></h3>
+      <div id="shareList"></div>
+    </div>
+    <div class="card">
+      <h3>科目总时长 <span class="more">备考全程累计</span></h3>
+      <div id="totalList"></div>
+      <div class="total-row"><span>合计</span><b id="totalSum">--</b></div>
+    </div>
+    <div class="card">
+      <button class="btn main" style="width:100%" onclick="showReport()">生成今日战报</button>
+    </div>
+  </div>
+
+  <!-- 成就 -->
+  <div class="page" id="pg2">
+    <div class="card lv-card">
+      <div class="lv-row">
+        <div class="lv-badge">Lv5</div>
+        <div class="lv-info">
+          <div class="l">稳步前进</div>
+          <div class="xpbar"><div style="width:73%"></div></div>
+          <div class="x">342 / 470 XP · 下一级还需 128 分钟专注</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>徽章墙 <span class="more">5 / 12</span></h3>
+      <div class="bgrid" id="badgeGrid"></div>
+    </div>
+  </div>
+
+  <!-- 设置 -->
+  <div class="page" id="pg3">
+    <div class="card">
+      <h3>基本设置</h3>
+      <div class="srow"><div class="sl">考试日期</div><div class="sr">2027-12-18</div></div>
+      <div class="srow"><div class="sl">每日目标</div><div class="sr">8 小时</div></div>
+      <div class="srow"><div class="sl">周起始日</div><div class="sr">周一</div></div>
+    </div>
+    <div class="card">
+      <h3>番茄钟</h3>
+      <div class="srow"><div class="sl">专注时长</div><div class="sr">45 分钟</div></div>
+      <div class="srow"><div class="sl">短休息</div><div class="sr">10 分钟</div></div>
+      <div class="srow"><div class="sl">长休息（每 3 番茄）</div><div class="sr">20 分钟</div></div>
+    </div>
+    <div class="card">
+      <h3>科目管理</h3>
+      <div class="srow"><div class="sl"><span class="dotc" style="background:var(--c-pol)"></span>政治</div><div class="sr">改名 / 颜色</div></div>
+      <div class="srow"><div class="sl"><span class="dotc" style="background:var(--c-eng)"></span>英语</div><div class="sr">改名 / 颜色</div></div>
+      <div class="srow"><div class="sl"><span class="dotc" style="background:var(--c-math)"></span>数学</div><div class="sr">改名 / 颜色</div></div>
+      <div class="srow"><div class="sl"><span class="dotc" style="background:var(--c-major)"></span>专业课一</div><div class="sr">改名 / 颜色</div></div>
+    </div>
+    <div class="card">
+      <h3>数据与安全</h3>
+      <div class="srow"><div class="sl">导出 JSON 备份</div><div class="sr"></div></div>
+      <div class="srow"><div class="sl">导入恢复</div><div class="sr"></div></div>
+      <div class="srow"><div class="sl">修改密码</div><div class="sr"></div></div>
+      <div class="srow"><div class="sl">退出登录</div><div class="sr"></div></div>
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="nav" id="nav">
+    <div class="nv on" data-p="0"><div class="ni">◉</div><div class="nl">今日</div></div>
+    <div class="nv" data-p="1"><div class="ni">▤</div><div class="nl">统计</div></div>
+    <div class="nv" data-p="2"><div class="ni">✦</div><div class="nl">成就</div><span class="badge-red"></span></div>
+    <div class="nv" data-p="3"><div class="ni">⚙</div><div class="nl">设置</div></div>
+  </div>
+</div>
+
+<!-- 战报弹窗 -->
+<div class="mask" id="reportMask" onclick="this.classList.remove('on')">
+  <div class="report" onclick="event.stopPropagation()">
+    <div class="rk">今 日 战 报</div>
+    <div class="rd" id="rpDay"></div>
+    <div class="pie">
+      <div class="pv2"><b>2h34m</b><span>今日专注</span></div>
+    </div>
+    <div class="rline"><span>政治</span><span>1h00m · 39%</span></div>
+    <div class="rline"><span>英语</span><span>45m · 29%</span></div>
+    <div class="rline"><span>数学</span><span>30m · 19%</span></div>
+    <div class="rline"><span>专业课</span><span>19m · 13%</span></div>
+    <div class="rline"><span>完成事项</span><span>5 项</span></div>
+    <div class="rline" style="border:none"><span>连续打卡 / 距考研</span><span>12 天 · <b id="rpDday"></b> 天</span></div>
+    <div class="rbtns">
+      <button class="btn ghost" onclick="document.getElementById('reportMask').classList.remove('on')">关闭</button>
+      <button class="btn main" onclick="toast('正式版：导出 750×1000 PNG')">导出 PNG</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ===== 倒计时 ===== */
+const exam = new Date('2027-12-18T00:00:00');
+const dd = Math.ceil((exam - Date.now()) / 86400000);
+document.getElementById('dday').textContent = dd;
+document.getElementById('rpDday').textContent = dd;
+document.getElementById('rpDay').textContent = new Date().toLocaleDateString('zh-CN', {month:'long', day:'numeric', weekday:'long'});
+
+/* ===== 页面切换 ===== */
+const pages = document.querySelectorAll('.page'), navs = document.querySelectorAll('.nv');
+function goPage(i){ pages.forEach((p,x)=>p.classList.toggle('on',x===i)); navs.forEach((n,x)=>n.classList.toggle('on',x===i)); }
+navs.forEach(n=>n.onclick=()=>goPage(+n.dataset.p));
+
+/* ===== 今日目标进度 ===== */
+let todayMin = 154;
+function renderGoal(){
+  const pct = Math.min(100, Math.round(todayMin/480*100));
+  document.getElementById('goalFill').style.width = pct+'%';
+  document.getElementById('todayPct').textContent = pct+'%';
+  document.getElementById('todayMin').innerHTML = Math.floor(todayMin/60)+'<small>h</small> '+(todayMin%60)+'<small>m</small>';
+}
+renderGoal();
+
+/* ===== 番茄钟（时间戳差值计时，切后台照走） ===== */
+const FOCUS = 45*60, C = 565.5;
+let acc = 0, segStart = null, running = false, tomatoes = 3, timer = null;
+const ring = document.getElementById('ring'), tDisp = document.getElementById('tDisp'),
+      tState = document.getElementById('tState'), btnStart = document.getElementById('btnStart');
+function elapsed(){ return acc + (segStart ? (Date.now()-segStart)/1000 : 0); }
+function renderT(){
+  const e = Math.min(elapsed(), FOCUS);
+  ring.style.strokeDashoffset = C * (1 - e/FOCUS);
+  const r = Math.max(0, FOCUS - e), m = String(Math.floor(r/60)).padStart(2,'0'), s = String(Math.floor(r%60)).padStart(2,'0');
+  tDisp.textContent = m+':'+s;
+}
+function renderDots(){
+  document.getElementById('tomatoDots').innerHTML =
+    Array.from({length:3},(_,i)=>`<span class="dot ${i<tomatoes%3||(tomatoes>0&&tomatoes%3===0)?'':''}"></span>`.replace('dot ','dot '))
+    .join('') + `<span style="margin-left:6px">今日 ${tomatoes} 个番茄${tomatoes%3===0&&tomatoes>0?' · 下一个后长休息':''}</span>`;
+  // 简化：显示 3 个槽位
+  document.getElementById('tomatoDots').innerHTML =
+    Array.from({length:3},(_,i)=>`<span class="dot ${i < tomatoes%3 ? 'on':''}"></span>`).join('') +
+    `<span style="margin-left:6px">今日第 ${tomatoes+1} 个番茄${tomatoes>0&&tomatoes%3===0?'（刚刚长休息过）':''}</span>`;
+}
+renderDots();
+btnStart.onclick = () => {
+  if(!running){
+    segStart = Date.now(); running = true;
+    btnStart.textContent = '暂停'; btnStart.classList.replace('main','ghost');
+    tState.textContent = '专注中 · ' + curSub;
+    timer = setInterval(()=>{ renderT(); if(elapsed()>=FOCUS) finish(); }, 250);
+  } else {
+    acc = elapsed(); segStart = null; running = false;
+    btnStart.textContent = '继续'; btnStart.classList.replace('ghost','main');
+    tState.textContent = '已暂停 ' + Math.round(acc/60) + ' 分钟';
+    clearInterval(timer);
+  }
+};
+function finish(){
+  clearInterval(timer); acc = 0; segStart = null; running = false; tomatoes++;
+  btnStart.textContent = '开始专注'; btnStart.classList.replace('ghost','main');
+  tState.textContent = '完成！休息 10 分钟'; renderT(); renderDots();
+  todayMin += 45; renderGoal();
+  toast('番茄完成！休息 10 分钟' + (tomatoes%3===0 ? '，本轮长休息 20 分钟' : ''));
+  setTimeout(()=>{ tState.textContent = '准备专注 · ' + curSub; }, 4000);
+}
+document.getElementById('btnAbort').onclick = () => {
+  if(!running && acc === 0){ toast('还没有开始的番茄'); return; }
+  const real = Math.round(elapsed()/60);
+  clearInterval(timer); const got = real; acc = 0; segStart = null; running = false;
+  btnStart.textContent = '开始专注'; btnStart.classList.replace('ghost','main');
+  tState.textContent = '准备专注 · ' + curSub; renderT();
+  if(got>0){ todayMin += got; renderGoal(); }
+  toast('已中断：实际专注 '+got+' 分钟已记录');
+};
+document.addEventListener('visibilitychange', renderT); // 回前台立即重算——时间戳差值的意义
+let curSub = '政治';
+document.getElementById('subChips').addEventListener('click', e=>{
+  const c = e.target.closest('.chip'); if(!c) return;
+  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));
+  c.classList.add('sel'); curSub = c.dataset.s;
+  if(!running) tState.textContent = '准备专注 · ' + curSub;
+});
+
+/* ===== 今日完成 ===== */
+let records = [
+  {t:'背单词 100 个', sub:'英语', tm:'08:12'},
+  {t:'数学：高数第 3 章习题', sub:'数学', note:'错题本同步整理', tm:'10:40'},
+  {t:'英语：2010 年真题阅读', sub:'英语', tm:'14:05'},
+  {t:'政治：马原视频课 2 讲', sub:'政治', note:'倍速 + 笔记', tm:'14:50'},
+  {t:'专业课：操作系统第 4 章', sub:'专业课', tm:'15:02'},
+];
+const subCls = {'政治':'sub-pol','英语':'sub-eng','数学':'sub-math','专业课':'sub-major'};
+function renderRecords(){
+  document.getElementById('taskList').innerHTML = records.map((r,i)=>`
+    <div class="task">
+      <div class="tt">
+        <div class="ti">${r.sub?`<span class="tag ${subCls[r.sub]}">${r.sub}</span>`:''}${r.t}</div>
+        ${r.note?`<div class="tm">${r.note}</div>`:''}
+      </div>
+      <div class="tm" style="flex-shrink:0;margin-top:3px">${r.tm}</div>
+      <div class="mv del" onclick="delRecord(${i})">✕</div>
+    </div>`).join('');
+  document.getElementById('taskStat').textContent = records.length;
+}
+function delRecord(i){ records.splice(i,1); renderRecords(); }
+function addRecord(){
+  const inp = document.getElementById('taskInput');
+  if(!inp.value.trim()) return;
+  const now = new Date();
+  const tm = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  records.push({t:inp.value.trim(), sub:null, tm});
+  inp.value=''; renderRecords();
+}
+document.getElementById('taskInput').addEventListener('keydown', e=>{ if(e.key==='Enter') addRecord(); });
+renderRecords();
+
+/* ===== 周柱状图 ===== */
+const wk = [
+  {d:'一', v:[70,45,50,47]}, {d:'二', v:[60,40,46,40]}, {d:'三', v:[80,55,60,45]},
+  {d:'四', v:[55,35,40,38]}, {d:'五', v:[85,60,65,44]}, {d:'六', v:[95,70,80,60]},
+  {d:'日', v:[60,45,30,19]},
+];
+const cols = ['var(--c-pol)','var(--c-eng)','var(--c-math)','var(--c-major)'];
+document.getElementById('weekChart').innerHTML = wk.map(w=>{
+  const tot = w.v.reduce((a,b)=>a+b,0);
+  const bars = w.v.map((m,i)=>`<div style="height:${m*0.55}px;background:${cols[i]}" title="${['政治','英语','数学','专业课'][i]} ${m}min"></div>`).join('');
+  return `<div class="wcol"><span class="wval">${(tot/60).toFixed(1)}h</span><div class="wbars">${bars}</div><span class="wlab">${w.d}</span></div>`;
+}).join('');
+
+/* ===== 热力图（18 周） ===== */
+function rnd(seed){ const x = Math.sin(seed*127.1)*43758.5; return x - Math.floor(x); }
+let hmHtml = '';
+for(let w=0; w<18; w++){
+  hmHtml += '<div class="hcol">';
+  for(let d=0; d<7; d++){
+    const r = rnd(w*7+d+1);
+    let lv = 0;
+    if(r>0.25) lv = 1; if(r>0.55) lv = 2; if(r>0.82) lv = 3;
+    if(w===17 && d<3) lv = 2; // 最近几天
+    hmHtml += `<div class="hc ${lv?'l'+lv:''}"></div>`;
+  }
+  hmHtml += '</div>';
+}
+document.getElementById('heatmap').innerHTML = hmHtml;
+
+/* ===== 科目占比 ===== */
+const share = [['政治',39,'var(--c-pol)'],['英语',29,'var(--c-eng)'],['数学',19,'var(--c-math)'],['专业课',13,'var(--c-major)']];
+document.getElementById('shareList').innerHTML = share.map(s=>`
+  <div class="sharerow"><div class="nm">${s[0]}</div><div class="sb"><div style="width:${s[1]}%;background:${s[2]}"></div></div><div class="pv">${s[1]}%</div></div>`).join('');
+
+/* ===== 科目总时长（备考全程累计，分钟） ===== */
+const totals = [
+  {nm:'政治', min:126*60+40, c:'var(--c-pol)'},
+  {nm:'英语', min:98*60+15,  c:'var(--c-eng)'},
+  {nm:'数学', min:87*60+30,  c:'var(--c-math)'},
+  {nm:'专业课', min:64*60+50, c:'var(--c-major)'},
+];
+const fmt = m => Math.floor(m/60)+'h '+String(m%60).padStart(2,'0')+'m';
+const maxMin = Math.max(...totals.map(t=>t.min));
+document.getElementById('totalList').innerHTML = totals.map(t=>`
+  <div class="sharerow"><div class="nm">${t.nm}</div><div class="sb"><div style="width:${Math.round(t.min/maxMin*100)}%;background:${t.c}"></div></div><div class="pv" style="width:76px">${fmt(t.min)}</div></div>`).join('');
+document.getElementById('totalSum').textContent = fmt(totals.reduce((a,t)=>a+t.min,0));
+
+/* ===== 徽章 ===== */
+const badges = [
+  ['初','初来乍到','首次专注打卡',1,'var(--p)'],['7','七日不辍','连续 7 天打卡',1,'#0891b2'],
+  ['21','廿一日成习','连续 21 天',0,'#'], ['100','百日筑基','连续 100 天',0,'#'],
+  ['达','当日达标','首次单日 ≥2h',1,'#d97706'],['周','达标周','连续 7 天 ≥2h',0,'#'],
+  ['100h','百小时俱乐部','累计 100h',1,'#7c3aed'],['200h','双百小时','累计 200h',0,'#'],
+  ['500h','五百小时','累计 500h',0,'#'],['铁','铁人','单日 ≥10h',0,'#'],
+  ['早','早鸟','7:00 前开卷',1,'#ca8a04'],['科','全科大满贯','≥4 科有记录',0,'#'],
+];
+document.getElementById('badgeGrid').innerHTML = badges.map(b=>`
+  <div class="bd ${b[3]?'':'off'}">
+    <div class="ic" style="background:${b[3]?b[4]:'#d7ddd9'};font-size:${b[0].length>2?'11px':'15px'}">${b[0]}</div>
+    <div class="nm">${b[1]}</div><div class="cd">${b[2]}</div>
+  </div>`).join('');
+
+/* ===== 战报 / toast ===== */
+function showReport(){ document.getElementById('reportMask').classList.add('on'); }
+let toastTimer = null;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+/* ===== 快捷键：1-4 切页 · 空格开始/暂停 · N 新任务 ===== */
+document.addEventListener('keydown', e=>{
+  if(e.target.tagName === 'INPUT') return;
+  if(e.key >= '1' && e.key <= '4'){ goPage(+e.key-1); }
+  else if(e.code === 'Space'){ e.preventDefault(); btnStart.click(); }
+  else if(e.key.toLowerCase() === 'n'){ e.preventDefault(); goPage(0); document.getElementById('taskInput').focus(); }
+});
+</script>
+</body>
+</html>

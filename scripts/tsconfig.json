@@ -1,0 +1,7 @@
+{
+  "//": "给 tsx 运行的脚本用：Next 的 tsconfig 要求 jsx=preserve，而 tsx 直接跑 .tsx 时需要 automatic runtime，否则每个文件都得 import React。",
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  }
+}
